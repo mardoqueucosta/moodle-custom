@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:10.11
+    container_name: moodle_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: moodle
+      MYSQL_USER: moodleuser
+      MYSQL_PASSWORD: moodlepass
+    volumes:
+      - dbdata:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    command: >
+      --innodb_buffer_pool_size=256M
+      --innodb_log_file_size=64M
+      --innodb_flush_log_at_trx_commit=2
+      --query_cache_type=1
+      --query_cache_size=32M
+      --tmp_table_size=64M
+      --max_heap_table_size=64M
+
+  redis:
+    image: redis:7-alpine
+    container_name: moodle_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 128mb --maxmemory-policy allkeys-lru
+
+  moodle:
+    build: .
+    container_name: moodle_app
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+      - redis
+    volumes:
+      - moodledata:/var/www/moodledata
+    ports:
+      - "8080:80"
+
+volumes:
+  dbdata:
+  moodledata:

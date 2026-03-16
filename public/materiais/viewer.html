@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizador de Normas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #0f172a; color: #fff; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Disable text selection */
+body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+
+/* Header */
+.viewer-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 24px; background: #1e293b; border-bottom: 1px solid #334155;
+    min-height: 56px;
+}
+.viewer-title { display: flex; align-items: center; gap: 12px; }
+.viewer-title svg { color: #dc2626; }
+.viewer-title h1 { font-size: 16px; font-weight: 600; color: #f1f5f9; }
+.viewer-badge { font-size: 11px; background: rgba(220,38,38,0.15); color: #fca5a5; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+.viewer-actions { display: flex; gap: 8px; align-items: center; }
+.viewer-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px; border: 1px solid #475569;
+    background: transparent; color: #94a3b8; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.viewer-btn:hover { background: #334155; color: #f1f5f9; }
+.viewer-btn.active { background: #1678C2; border-color: #1678C2; color: #fff; }
+.viewer-close {
+    padding: 8px 16px; border-radius: 8px; border: none;
+    background: #334155; color: #f1f5f9; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; font-family: inherit; text-decoration: none;
+}
+.viewer-close:hover { background: #475569; }
+
+/* Watermark overlay */
+.viewer-container { flex: 1; position: relative; overflow: hidden; }
+.watermark {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none; z-index: 10;
+    background: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 200px,
+        rgba(255,255,255,0.015) 200px,
+        rgba(255,255,255,0.015) 201px
+    );
+}
+.watermark::after {
+    content: 'SOMENTE VISUALIZAÇÃO'; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg);
+    font-size: 48px; font-weight: 700; color: rgba(255,255,255,0.04);
+    letter-spacing: 8px; white-space: nowrap; pointer-events: none;
+}
+
+/* PDF iframe */
+.pdf-frame {
+    width: 100%; height: 100%; border: none; background: #1a1a2e;
+}
+
+/* Page info */
+.page-info {
+    font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px;
+}
+.lock-icon { color: #f59e0b; }
+
+/* No permission message */
+.no-download-msg {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: #1e293b; border: 1px solid #475569; border-radius: 12px;
+    padding: 12px 20px; display: none; align-items: center; gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4); z-index: 100; animation: fadeIn 0.3s;
+}
+.no-download-msg.show { display: flex; }
+.no-download-msg svg { color: #f59e0b; min-width: 20px; }
+.no-download-msg span { font-size: 13px; color: #e2e8f0; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* Zoom controls */
+.zoom-controls { display: flex; align-items: center; gap: 4px; }
+.zoom-btn {
+    width: 32px; height: 32px; border-radius: 6px; border: 1px solid #475569;
+    background: transparent; color: #94a3b8; font-size: 16px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.zoom-btn:hover { background: #334155; color: #f1f5f9; }
+.zoom-level { font-size: 12px; color: #94a3b8; min-width: 40px; text-align: center; }
+
+@media print { body { display: none !important; } }
+</style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="viewer-header">
+    <div class="viewer-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <h1 id="docTitle">Carregando...</h1>
+        <span class="viewer-badge">SOMENTE LEITURA</span>
+    </div>
+    <div class="viewer-actions">
+        <div class="page-info">
+            <svg class="lock-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <span>Download desabilitado</span>
+        </div>
+        <a href="javascript:history.back()" class="viewer-close">✕ Fechar</a>
+    </div>
+</div>
+
+<div class="viewer-container">
+    <div class="watermark"></div>
+    <canvas id="pdfCanvas" style="display:none;"></canvas>
+    <iframe id="pdfFrame" class="pdf-frame" style="display:none;"></iframe>
+    <div id="pdfViewer" style="width:100%;height:100%;overflow:auto;background:#374151;display:flex;flex-direction:column;align-items:center;padding:20px 0;gap:16px;"></div>
+</div>
+
+<div class="no-download-msg" id="noDownloadMsg">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    <span>Este material é somente para visualização. Download não permitido.</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// Get PDF file from URL params
+const params = new URLSearchParams(window.location.search);
+const file = params.get('file');
+const title = params.get('title') || 'Documento';
+
+document.getElementById('docTitle').textContent = title;
+document.title = title + ' — Visualizador';
+
+// Titles mapping
+const titles = {
+    'ABNT-NBR-14724-2024.pdf': 'NBR 14724:2024 — Trabalhos Acadêmicos',
+    'ABNT-NBR-6023-2025.pdf': 'NBR 6023:2025 — Referências',
+    'ABNT-NBR-10520-2023.pdf': 'NBR 10520:2023 — Citações',
+    'ABNT-NBR-6027-2012-sumario.pdf': 'NBR 6027:2012 — Sumário'
+};
+
+if (file) {
+    const filename = file.split('/').pop();
+    if (titles[filename]) {
+        document.getElementById('docTitle').textContent = titles[filename];
+        document.title = titles[filename] + ' — Visualizador';
+    }
+
+    // Use PDF.js to render without download option
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const viewer = document.getElementById('pdfViewer');
+
+    pdfjsLib.getDocument(file).promise.then(function(pdf) {
+        const totalPages = pdf.numPages;
+
+        for (let i = 1; i <= totalPages; i++) {
+            pdf.getPage(i).then(function(page) {
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale });
+
+                const canvas = document.createElement('canvas');
+                canvas.style.maxWidth = '100%';
+                canvas.style.borderRadius = '4px';
+                canvas.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                // Insert in order
+                const wrapper = document.createElement('div');
+                wrapper.style.position = 'relative';
+                wrapper.dataset.page = i;
+                wrapper.appendChild(canvas);
+
+                // Find correct position
+                const children = Array.from(viewer.children);
+                let inserted = false;
+                for (const child of children) {
+                    if (parseInt(child.dataset.page) > i) {
+                        viewer.insertBefore(wrapper, child);
+                        inserted = true;
+                        break;
+                    }
+                }
+                if (!inserted) viewer.appendChild(wrapper);
+
+                const context = canvas.getContext('2d');
+                page.render({ canvasContext: context, viewport: viewport });
+            });
+        }
+    }).catch(function(err) {
+        viewer.innerHTML = '<p style="color:#f87171;padding:40px;">Erro ao carregar PDF: ' + err.message + '</p>';
+    });
+}
+
+// Block keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Block Ctrl+S, Ctrl+P, Ctrl+Shift+S
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S' || e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        showNoDownloadMsg();
+        return false;
+    }
+});
+
+// Block drag
+document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+// Show message
+function showNoDownloadMsg() {
+    const msg = document.getElementById('noDownloadMsg');
+    msg.classList.add('show');
+    setTimeout(() => msg.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>

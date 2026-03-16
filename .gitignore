@@ -1,0 +1,12 @@
+# Videos (muito grandes para Git)
+public/videos/**/*.mp4
+
+# Materiais binarios (PDFs e DOCX - opcionais no Git)
+# Descomente se nao quiser versionar os PDFs:
+# public/materiais/**/*.pdf
+# public/materiais/**/*.docx
+
+# OS files
+desktop.ini
+Thumbs.db
+.DS_Store
