@@ -16,6 +16,7 @@ moodle-topofbody.html.txt
 # Credenciais e scripts de infra (NÃO versionar)
 config.prod.php
 .env
+deploy.sh
 deploy-infra.sh
 
 # OS files

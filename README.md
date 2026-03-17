@@ -28,9 +28,9 @@ moodle-custom/
 ├── htaccess-root.conf                   ← Apache: rewrites (URLs amigáveis)
 ├── docker-compose.yml                   ← dev (localhost:8080)
 ├── docker-compose.prod.yml              ← prod (Nginx + Certbot)
-├── deploy.sh                            ← deploy automatizado
 ├── config.local.php                     ← config Moodle dev (versionado)
 ├── config.prod.php                      ← config Moodle prod (NÃO versionado)
+├── deploy.sh                            ← deploy automatizado (NÃO versionado)
 └── .env                                 ← senhas DB prod (NÃO versionado)
 ```
 
