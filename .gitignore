@@ -13,9 +13,10 @@ moodle-footer.js.txt
 moodle-head.css.txt
 moodle-topofbody.html.txt
 
-# Credenciais de produção (NÃO versionar)
+# Credenciais e scripts de infra (NÃO versionar)
 config.prod.php
 .env
+deploy-infra.sh
 
 # OS files
 desktop.ini
