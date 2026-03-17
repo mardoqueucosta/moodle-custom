@@ -3,7 +3,7 @@
 Plataforma EAD para o programa de Pós-Graduação em Engenharia Biomédica.
 Moodle 5.1 dockerizado com customizações de interface, player de vídeo e viewer de PDF.
 
-**Produção:** https://ead.engenhariabiomedica.com
+**Produção:** https://pos.engenhariabiomedica.com
 
 ## Stack
 

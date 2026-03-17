@@ -44,7 +44,7 @@ services:
     ports:
       - "127.0.0.1:8080:80"
     environment:
-      MOODLE_URL: https://ead.engenhariabiomedica.com
+      MOODLE_URL: https://pos.engenhariabiomedica.com
 
   nginx:
     image: nginx:alpine
