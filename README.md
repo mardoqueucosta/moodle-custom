@@ -1,91 +1,56 @@
-# Moodle Custom - Engenharia Biomédica Pós-Graduação
+# Moodle Custom - Engenharia Biomédica EAD
 
-## Objetivo
-Customizações do Moodle 5.1 LMS para o curso de Engenharia Biomédica.
-Este é o projeto fonte — todas as alterações são feitas aqui e enviadas ao servidor via `deploy.sh`.
+Plataforma EAD para o programa de Pós-Graduação em Engenharia Biomédica.
+Moodle 5.1 dockerizado com customizações de interface, player de vídeo e viewer de PDF.
 
-## Servidor VPS HostGator
-- **URL:** http://129.121.51.237
-- **Admin:** admin
-- **Senha:** Admin1234!
-- **SSH:** ver `../servidor-hostgator.md`
+**Produção:** https://ead.engenhariabiomedica.com
 
-## Stack no servidor
-- **SO:** Ubuntu 24.04.4 LTS (Kernel 6.8.0-106)
-- **Web Server:** Apache 2.4.58
-- **PHP:** 8.3.6
-- **Banco de dados:** MariaDB 10.11.14
-- **Moodle:** 5.1
+## Stack
 
-## Banco de dados
-- **Host:** localhost
-- **Database:** moodle
-- **Usuário:** moodleuser
-- **Senha:** M00dle@DB2024!
+- Docker: Moodle (PHP 8.2-apache), MariaDB 10.11, Redis 7, Nginx (reverse proxy + SSL)
+- SSL via Let's Encrypt/Certbot
 
 ## Estrutura do projeto
+
 ```
 moodle-custom/
-├── public/                              ← espelho de /var/www/html/public/ no servidor
-│   ├── videos/metodologia-cientifica/
-│   │   ├── index.html                   ← player estilo Hotmart
-│   │   └── *.mp4                        ← 8 videoaulas (1.1GB)
-│   └── materiais/
-│       ├── viewer.html                  ← viewer PDF (somente leitura)
-│       └── metodologia-cientifica/normas/
-│           ├── ABNT-NBR-*.pdf           ← normas ABNT
-│           └── Modelo_TCC_Completo_ABNT.docx
-├── scripts/                             ← PHP de customização do Moodle
-├── sql/                                 ← SQL de customização + backup
-├── deploy.sh                            ← envia arquivos para o servidor
-├── serve.sh                             ← servidor local para testes
-└── docker-compose.yml                   ← referência do Docker original
+├── public/conteudo/                     ← conteúdo das disciplinas
+│   ├── player.html                      ← player genérico (?curso=slug)
+│   ├── viewer.html                      ← viewer PDF somente leitura (?file=slug/materiais/X.pdf)
+│   └── <curso-slug>/
+│       ├── videos/*.mp4                 ← videoaulas (gitignored)
+│       └── materiais/*.pdf|*.docx       ← materiais complementares (gitignored)
+├── public/                              ← PHP endpoints customizados
+│   ├── enrol_programa.php               ← inscrição no programa (mestrado/doutorado)
+│   ├── enrol_discipline.php             ← inscrição em disciplina
+│   └── enrolled_check.php               ← AJAX: verifica inscrições do aluno
+├── nginx/default.conf                   ← Nginx: SSL + proxy + static files
+├── htaccess-root.conf                   ← Apache: rewrites (URLs amigáveis)
+├── docker-compose.yml                   ← dev (localhost:8080)
+├── docker-compose.prod.yml              ← prod (Nginx + Certbot)
+├── deploy.sh                            ← deploy automatizado
+├── config.local.php                     ← config Moodle dev (versionado)
+├── config.prod.php                      ← config Moodle prod (NÃO versionado)
+└── .env                                 ← senhas DB prod (NÃO versionado)
 ```
 
-## Como usar
+## Desenvolvimento local
 
-### Testar localmente
 ```bash
-bash serve.sh
-# Acesse http://localhost:8888/videos/metodologia-cientifica/index.html
+docker compose up -d
+# Acesse http://localhost:8080
 ```
 
-### Deploy para o servidor
+## Deploy para produção
+
 ```bash
-bash deploy.sh --html       # envia HTMLs (player + viewer)
-bash deploy.sh --materiais  # envia PDFs e DOCX
-bash deploy.sh --videos     # envia vídeos (1.1GB)
-bash deploy.sh --all        # envia tudo + limpa cache
+bash deploy.sh            # git push + pull no servidor + recreate container
+bash deploy.sh --full     # + envia vídeos e materiais via SCP
 ```
 
-## Estrutura no servidor
-```
-/var/www/html/               → código fonte do Moodle 5.1
-/var/www/html/public/        → DocumentRoot (Apache)
-/var/www/moodledata/         → dados do Moodle (uploads, cache, sessões)
-/etc/apache2/                → configuração Apache
-/etc/php/8.3/                → configuração PHP
-/etc/cron.d/moodle           → cron job (executa a cada minuto)
-```
+## Configuração inicial do servidor
 
-## Configurações PHP (99-moodle.ini)
-```ini
-max_input_vars = 5000
-memory_limit = 256M
-post_max_size = 100M
-upload_max_filesize = 100M
-max_execution_time = 300
-opcache.enable = 1
-```
+O servidor precisa de dois arquivos que não estão no git:
 
-## Status
-- [x] Servidor VPS configurado (Ubuntu 24.04 + LAMP)
-- [x] Moodle 5.1 instalado e configurado
-- [x] Banco de dados migrado do Docker
-- [x] Moodledata migrado do Docker
-- [x] Player de videoaulas (estilo Hotmart)
-- [x] Viewer de PDF (somente leitura)
-- [x] Materiais complementares (normas ABNT + template)
-- [x] Estrutura local centralizada com deploy automatizado
-- [ ] Configurar domínio + HTTPS (Let's Encrypt)
-- [ ] Repositório GitHub
+1. **`.env`** — senhas do banco de dados
+2. **`config.prod.php`** — configuração Moodle de produção
