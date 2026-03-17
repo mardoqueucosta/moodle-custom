@@ -1,10 +1,20 @@
 # Videos (muito grandes para Git)
 public/videos/**/*.mp4
 
-# Materiais binarios (PDFs e DOCX - opcionais no Git)
-# Descomente se nao quiser versionar os PDFs:
-# public/materiais/**/*.pdf
-# public/materiais/**/*.docx
+# Materiais binarios (PDFs e DOCX)
+public/materiais/**/*.pdf
+public/materiais/**/*.docx
+
+# SQL dumps (grandes, contém dados)
+sql/
+
+# Backups de configuração do Moodle (contém HTML/CSS/JS do banco)
+moodle-footer.js.txt
+moodle-head.css.txt
+moodle-topofbody.html.txt
+
+# Credenciais de produção (NÃO versionar)
+config.prod.php
 
 # OS files
 desktop.ini

@@ -1,0 +1,3 @@
+# Public folder - static content (videos, materiais) served directly
+# All rewrite rules are in the root .htaccess (htaccess-root.conf)
+# No rewrites needed here - files are served as-is
