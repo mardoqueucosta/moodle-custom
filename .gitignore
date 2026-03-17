@@ -1,9 +1,9 @@
 # Videos (muito grandes para Git)
-public/videos/**/*.mp4
+public/conteudo/**/*.mp4
 
 # Materiais binarios (PDFs e DOCX)
-public/materiais/**/*.pdf
-public/materiais/**/*.docx
+public/conteudo/**/*.pdf
+public/conteudo/**/*.docx
 
 # SQL dumps (grandes, contém dados)
 sql/

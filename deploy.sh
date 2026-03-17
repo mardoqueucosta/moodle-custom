@@ -58,16 +58,12 @@ echo ""
 
 # 5. Envia arquivos grandes se --full
 if [ "$1" = "--full" ]; then
-    echo "→ Enviando vídeos e materiais (~1.1GB)..."
+    echo "→ Enviando conteúdo (vídeos e materiais, ~1.1GB)..."
     SCP_CMD="scp -i $SSH_KEY -P $PORT"
 
-    # Videos
-    $SCP_CMD -r public/videos/ "$SERVER:$REMOTE_DIR/public/videos/"
-    echo "  ✓ Vídeos enviados"
-
-    # Materiais
-    $SCP_CMD -r public/materiais/ "$SERVER:$REMOTE_DIR/public/materiais/"
-    echo "  ✓ Materiais enviados"
+    # Conteudo (videos + materiais)
+    $SCP_CMD -r public/conteudo/ "$SERVER:$REMOTE_DIR/public/conteudo/"
+    echo "  ✓ Conteúdo enviado"
 
     # Recria container para montar os novos arquivos
     $SSH_CMD "cd $REMOTE_DIR && docker compose -f $COMPOSE_FILE up -d --no-deps moodle"

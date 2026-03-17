@@ -38,8 +38,7 @@ services:
       - ./public/enrol_discipline.php:/var/www/html/public/enrol_discipline.php
       - ./public/enrolled_check.php:/var/www/html/public/enrolled_check.php
       - ./public/.htaccess:/var/www/html/public/.htaccess
-      - ./public/videos:/var/www/html/public/videos
-      - ./public/materiais:/var/www/html/public/materiais
+      - ./public/conteudo:/var/www/html/public/conteudo
       - ./htaccess-root.conf:/var/www/html/.htaccess
       - ./config.prod.php:/var/www/html/config.php
     ports:
@@ -58,8 +57,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
-      - ./public/videos:/var/www/html/public/videos:ro
-      - ./public/materiais:/var/www/html/public/materiais:ro
+      - ./public/conteudo:/var/www/html/public/conteudo:ro
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
       - webroot:/var/www/certbot

@@ -42,8 +42,7 @@ services:
       - ./public/enrol_discipline.php:/var/www/html/public/enrol_discipline.php
       - ./public/enrolled_check.php:/var/www/html/public/enrolled_check.php
       - ./public/.htaccess:/var/www/html/public/.htaccess
-      - ./public/videos:/var/www/html/public/videos
-      - ./public/materiais:/var/www/html/public/materiais
+      - ./public/conteudo:/var/www/html/public/conteudo
       - ./htaccess-root.conf:/var/www/html/.htaccess
       - ./config.local.php:/var/www/html/config.php
     ports:
