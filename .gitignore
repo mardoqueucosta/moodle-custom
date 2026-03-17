@@ -15,6 +15,7 @@ moodle-topofbody.html.txt
 
 # Credenciais de produção (NÃO versionar)
 config.prod.php
+.env
 
 # OS files
 desktop.ini
