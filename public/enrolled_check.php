@@ -9,7 +9,7 @@ if (!isloggedin() || isguestuser()) {
     if (isset($_GET["check"])) {
         echo json_encode(["access" => false, "redirect" => "/login/index.php"]);
     } else {
-        echo json_encode(["enrolled" => []]);
+        echo json_encode(["enrolled" => [], "loggedin" => false]);
     }
     exit;
 }
@@ -44,4 +44,4 @@ if (isset($_GET["check"])) {
 
 $courses = enrol_get_my_courses("id", "id ASC");
 $ids = array_map(function($c) { return (int)$c->id; }, $courses);
-echo json_encode(["enrolled" => array_values($ids)]);
+echo json_encode(["enrolled" => array_values($ids), "loggedin" => true]);
