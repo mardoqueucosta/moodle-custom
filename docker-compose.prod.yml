@@ -58,6 +58,11 @@ services:
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./public/conteudo:/var/www/html/public/conteudo:ro
+      # Moodle da Cultivee (outro repositório, em /opt/moodle-cultivee): config do nginx e aulas.
+      # Clonar /opt/moodle-cultivee ANTES de recriar este nginx: se o arquivo não existir, o Docker
+      # cria uma pasta no lugar e o nginx não sobe.
+      - /opt/moodle-cultivee/nginx/cursos.cultivee.com.br.conf:/etc/nginx/conf.d/cultivee.conf:ro
+      - /opt/moodle-cultivee/conteudo:/var/www/cultivee/conteudo:ro
       - certbot-etc:/etc/letsencrypt
       - certbot-var:/var/lib/letsencrypt
       - webroot:/var/www/certbot
