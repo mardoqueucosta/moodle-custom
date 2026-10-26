@@ -8,7 +8,8 @@ $css = <<<'CSSEOF'
    Cores baseadas em engenhariabiomedica.com
    ============================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+/* A fonte DM Sans vem do HTML adicional do cabeçalho (additionalhtmlhead). Um @import url(...) aqui
+   quebra o tema no Moodle 5.3: o compilador de SCSS tenta abrir o endereço como arquivo. */
 
 :root {
     --eb-primary-50: #EDF6FD;
@@ -52,12 +53,22 @@ body {
     color: var(--eb-teal-400) !important;
 }
 
+/* Moodle 5.3: o menu do topo virou "pílulas" (.mds-nav-pill) com fundo claro; volta ao texto branco */
+.navbar .mds-nav-pill {
+    color: #fff !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+}
+.navbar .mds-nav-pill:hover { color: var(--eb-teal-400) !important; }
+.navbar .mds-nav-pill--selected { box-shadow: inset 0 -2px 0 #fff !important; }
+
 a { color: var(--eb-primary-600) !important; }
 a:hover { color: var(--eb-teal-700) !important; }
 
 .btn-primary {
     background: var(--eb-primary-600) !important;
     border-color: var(--eb-primary-700) !important;
+    color: #fff !important; /* sem isto, um <a class="btn btn-primary"> pega a cor azul do "a" e o texto some */
     border-radius: 8px !important;
     font-weight: 600 !important;
 }
@@ -156,6 +167,23 @@ h2, .h2 { letter-spacing: -0.01em !important; }
 #page-login-index .card {
     border-radius: 14px !important;
     box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
+}
+
+/* Moodle 5.3: o login virou tela dividida, com um painel "Boas-vindas ao Moodle" e números do Moodle.
+   Esconde o painel e deixa o formulário num cartão central, como antes. */
+#page-login-index .login-layout-left { display: none !important; }
+#page-login-index #page { background: transparent !important; }
+#page-login-index .login-layout-right {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    max-width: 440px !important;
+    margin: 6vh auto !important;
+}
+#page-login-index .login-layout-right-content {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    padding: 2rem 2rem 1.5rem;
 }
 
 .badge-primary, .tag {

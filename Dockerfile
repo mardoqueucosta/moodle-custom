@@ -1,4 +1,5 @@
-FROM php:8.2-apache
+# Moodle 5.3 LTS pede PHP 8.3 (e MariaDB 11.4: ver docker-compose.yml)
+FROM php:8.3-apache
 
 # Install PHP extensions required by Moodle
 RUN apt-get update && apt-get install -y \
@@ -29,8 +30,9 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite headers
 
-# Download Moodle 5.1
-RUN curl -L https://download.moodle.org/download.php/direct/stable405/moodle-latest-405.tgz \
+# Moodle 5.3 LTS, versão FIXA (o "latest" muda toda semana e cada build traria outra versão sem aviso).
+# Para subir de versão: trocar o nome do arquivo, build com --no-cache e rodar admin/cli/upgrade.php.
+RUN curl -fL https://download.moodle.org/download.php/direct/stable503/moodle-5.3.tgz \
     -o /tmp/moodle.tgz \
     && tar xzf /tmp/moodle.tgz -C /tmp \
     && rm -rf /var/www/html/* \
@@ -44,6 +46,13 @@ RUN mkdir -p /var/www/moodledata \
 
 # Apache config for .htaccess
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+# Desde o Moodle 5.1 a raiz do site é public/ (o config.php continua em /var/www/html).
+# O que não for arquivo vai para o roteador do Moodle (r.php); as nossas regras do .htaccess vêm antes.
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && printf '<Directory /var/www/html/public>\n    FallbackResource /r.php\n</Directory>\n' > /etc/apache2/conf-available/moodle-router.conf \
+    && a2enconf moodle-router
 
 WORKDIR /var/www/html
 
