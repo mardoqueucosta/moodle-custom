@@ -5,8 +5,9 @@
 # compose usado não era o do servidor: o certificado da pós venceu em 15/06/2026 sem aviso.
 cd /opt/moodle
 echo "$(date -Is) renovando"
-docker compose -f docker-compose.prod.yml run --rm certbot renew --quiet
+docker compose -f docker-compose.prod.yml run --rm -T certbot renew --quiet </dev/null
 docker exec moodle_nginx nginx -s reload
+sleep 5  # o reload troca os processos do nginx aos poucos; antes disso ele ainda entrega o certificado antigo
 for d in pos.engenhariabiomedica.com cursos.cultivee.com.br; do
   fim=$(echo | timeout 10 openssl s_client -servername $d -connect 127.0.0.1:443 2>/dev/null | openssl x509 -noout -enddate | cut -d= -f2)
   dias=$(( ($(date -d "$fim" +%s) - $(date +%s)) / 86400 ))
